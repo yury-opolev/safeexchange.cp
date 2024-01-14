@@ -1,13 +1,13 @@
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Extensions.DependencyInjection;
+
 using Microsoft.Extensions.Hosting;
+using SafeExchange.CP.Core;
 
 var host = new HostBuilder()
-    .ConfigureFunctionsWorkerDefaults()
-    .ConfigureServices(services =>
+    .ConfigureFunctionsWorkerDefaults(SafeExchangeCPStartup.ConfigureWorkerDefaults)
+    .ConfigureAppConfiguration(SafeExchangeCPStartup.ConfigureAppConfiguration)
+    .ConfigureServices((hostBuilderContext, serviceCollection) =>
     {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
+        SafeExchangeCPStartup.ConfigureServices(hostBuilderContext.Configuration, serviceCollection);
     })
     .Build();
 

@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34316.72
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SafeExchange.ControlPlane", "SafeExchange.ControlPlane\SafeExchange.ControlPlane.csproj", "{90347E35-89CA-4CC1-B5C1-C1EDBB768405}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{90347E35-89CA-4CC1-B5C1-C1EDBB768405}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{90347E35-89CA-4CC1-B5C1-C1EDBB768405}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{90347E35-89CA-4CC1-B5C1-C1EDBB768405}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{90347E35-89CA-4CC1-B5C1-C1EDBB768405}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {711EA9D0-C8D6-4B20-9E4C-9EB01833049B}
+	EndGlobalSection
+EndGlobal

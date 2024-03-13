@@ -11,8 +11,10 @@ namespace SafeExchange.CP.Core
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
+    using SafeExchange.CP.Core.AzureAd;
     using SafeExchange.CP.Core.Configuration;
     using SafeExchange.CP.Core.DatabaseContext;
+    using SafeExchange.CP.Core.Graph;
     using SafeExchange.CP.Core.Middleware;
     using System.Text.Json;
     using System.Text.Json.Serialization;
@@ -57,6 +59,8 @@ namespace SafeExchange.CP.Core
                     cosmosDbConfig.CosmosDbEndpoint, new DefaultAzureCredential(), cosmosDbConfig.DatabaseName));
 
             services.AddSingleton<ITokenHelper, TokenHelper>();
+            services.AddSingleton<IConfidentialClientProvider, ConfidentialClientProvider>();
+            services.AddSingleton<IGraphDataProvider, GraphDataProvider>();
 
             services.Configure<JsonSerializerOptions>(options =>
             {

@@ -9,6 +9,8 @@ namespace SafeExchange.CP.Core.DatabaseContext
 
     public class SafeExchangeCPDbContext : DbContext
     {
+        public DbSet<User> Users { get; set; }
+
         public DbSet<Application> Applications { get; set; }
 
         public DbSet<EntityRecord> Entities { get; set; }
@@ -19,6 +21,11 @@ namespace SafeExchange.CP.Core.DatabaseContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<User>()
+                .ToContainer("Users")
+                .HasNoDiscriminator()
+                .HasPartitionKey(u => u.PartitionKey);
+
             modelBuilder.Entity<Application>()
                 .ToContainer("Applications")
                 .HasNoDiscriminator()

@@ -13,17 +13,31 @@ namespace SafeExchange.CP.Core.Middleware
     using System.Net;
     using System.Security.Claims;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Configuration;
+    using SafeExchange.CP.Core.Configuration;
+    using SafeExchange.CP.Core.Model;
+    using SafeExchange.CP.Core.Graph;
 
     public class TokenMiddlewareCore : ITokenMiddlewareCore
     {
+        public static readonly TimeSpan GroupSyncDelay = TimeSpan.FromMinutes(2);
+
         private readonly SafeExchangeCPDbContext dbContext;
 
         private readonly ITokenHelper tokenHelper;
 
+        private readonly bool useGroups;
+
+        private readonly IGraphDataProvider graphDataProvider;
+
         private readonly ILogger log;
 
-        public TokenMiddlewareCore(SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, ILogger<TokenMiddlewareCore> log)
+        public TokenMiddlewareCore(IConfiguration configuration, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, IGraphDataProvider graphDataProvider, ILogger<TokenMiddlewareCore> log)
         {
+            var adminConfiguration = new AdminConfiguration();
+            configuration.GetSection("AdminConfiguration").Bind(adminConfiguration);
+            this.useGroups = !string.IsNullOrWhiteSpace(adminConfiguration.AdminGroups);
+
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             this.tokenHelper = tokenHelper ?? throw new ArgumentNullException(nameof(tokenHelper));
             this.log = log ?? throw new ArgumentNullException(nameof(log));
@@ -39,17 +53,95 @@ namespace SafeExchange.CP.Core.Middleware
                 return result;
             }
 
-            var tenantId = this.tokenHelper.GetTenantId(principal);
-            var objectId = this.tokenHelper.GetObjectId(principal);
-            var clientId = this.tokenHelper.GetApplicationClientId(principal);
+            if (!isUserToken)
+            {
+                var tenantId = this.tokenHelper.GetTenantId(principal);
+                var objectId = this.tokenHelper.GetObjectId(principal);
+                var clientId = this.tokenHelper.GetApplicationClientId(principal);
 
-            this.log.LogInformation($"Caller [{clientId}] '{tenantId}.{objectId}' is not authenticated with a token from registered application.");
-            result.shouldReturn = true;
-            result.response = await ActionResults.CreateResponseAsync(
-                request, HttpStatusCode.Forbidden,
-                new BaseResponseObject<object> { Status = "forbidden", Error = "Forbidden." });
+                this.log.LogInformation($"Caller [{clientId}] '{tenantId}.{objectId}' is not authenticated with user token or a token from registered application.");
+                result.shouldReturn = true;
+                result.response = await ActionResults.CreateResponseAsync(
+                    request, HttpStatusCode.Forbidden,
+                    new BaseResponseObject<object> { Status = "forbidden", Error = "Not authenticated with user token." });
+                return result;
+            }
 
+            var user = await this.GetOrCreateUserAsync(principal);
+            if (user is null)
+            {
+                this.log.LogInformation($"Could not get or create user from claims principal.");
+
+                result.shouldReturn = true;
+                result.response = await ActionResults.CreateResponseAsync(
+                    request, HttpStatusCode.Forbidden,
+                    new BaseResponseObject<object> { Status = "forbidden", Error = "User token is invalid." });
+                return result;
+            }
+
+            await this.UpdateGroupsAsync(user, request, principal);
             return result;
+        }
+
+        private async Task<User?> GetOrCreateUserAsync(ClaimsPrincipal principal)
+        {
+            var aadObjectId = this.tokenHelper.GetObjectId(principal);
+            if (string.IsNullOrEmpty(aadObjectId))
+            {
+                return default;
+            }
+
+            var user = await this.dbContext.Users.WithPartitionKey(User.DefaultPartitionKey).FirstOrDefaultAsync(u => u.AadObjectId.Equals(aadObjectId));
+            return user ?? await this.CreateUserAsync(principal);
+        }
+
+        private async Task<User?> CreateUserAsync(ClaimsPrincipal principal)
+        {
+            var objectId = this.tokenHelper.GetObjectId(principal);
+            var tenantId = this.tokenHelper.GetTenantId(principal);
+            var userUpn = this.tokenHelper.GetUpn(principal);
+            var displayName = this.tokenHelper.GetDisplayName(principal);
+
+            this.log.LogInformation($"Creating user '{userUpn}', account id: '{objectId}.{tenantId}', display name: '{displayName}'.");
+
+            var user = new User(displayName, objectId, tenantId, userUpn, userUpn);
+            var createdEntity = await this.dbContext.Users.AddAsync(user);
+            await this.dbContext.SaveChangesAsync();
+
+            return createdEntity.Entity;
+        }
+
+        private async ValueTask UpdateGroupsAsync(User user, HttpRequestData request, ClaimsPrincipal principal)
+        {
+            if (!this.useGroups)
+            {
+                return;
+            }
+
+            var utcNow = DateTimeProvider.UtcNow;
+            if (utcNow <= user.GroupSyncNotBefore)
+            {
+                return;
+            }
+
+            var accountIdAndToken = this.tokenHelper.GetAccountIdAndToken(request, principal);
+            var userGroupsResult = await this.graphDataProvider.TryGetMemberOfAsync(accountIdAndToken);
+
+            if (!userGroupsResult.Success)
+            {
+                user.GroupSyncNotBefore = utcNow + TimeSpan.FromSeconds(30);
+                user.ConsentRequired = userGroupsResult.ConsentRequired;
+                user.Groups ??= Array.Empty<UserGroup>().ToList();
+            }
+            else
+            {
+                user.ConsentRequired = userGroupsResult.ConsentRequired;
+                user.GroupSyncNotBefore = utcNow + GroupSyncDelay;
+                user.Groups = userGroupsResult.Groups.Select(g => new UserGroup() { AadGroupId = g }).ToList();
+            }
+
+            await this.dbContext.SaveChangesAsync();
+            this.log.LogInformation($"User '{user.AadUpn}' ({user.AadTenantId}.{user.AadObjectId}) groups synced from graph.");
         }
 
         private async Task<bool> IsRegisteredApplicationAsync(ClaimsPrincipal principal)

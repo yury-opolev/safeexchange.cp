@@ -13,6 +13,7 @@ namespace SafeExchange.CP.Core
     using Microsoft.Extensions.Hosting;
     using SafeExchange.CP.Core.Configuration;
     using SafeExchange.CP.Core.DatabaseContext;
+    using SafeExchange.CP.Core.Middleware;
     using System.Text.Json;
     using System.Text.Json.Serialization;
 
@@ -24,9 +25,8 @@ namespace SafeExchange.CP.Core
 
         public static void ConfigureWorkerDefaults(HostBuilderContext context, IFunctionsWorkerApplicationBuilder builder)
         {
-            // TODO: 
-            // builder.UseWhen<DefaultAuthenticationMiddleware>(IsHttpTrigger);
-            // builder.UseWhen<TokenFilterMiddleware>(IsHttpTrigger);
+            builder.UseWhen<DefaultAuthenticationMiddleware>(IsHttpTrigger);
+            builder.UseWhen<TokenFilterMiddleware>(IsHttpTrigger);
         }
 
         public static void ConfigureAppConfiguration(IConfigurationBuilder configurationBuilder)
@@ -46,12 +46,17 @@ namespace SafeExchange.CP.Core
         {
             services.AddHttpClient();
 
+            services.AddScoped<ITokenMiddlewareCore, TokenMiddlewareCore>();
+            services.AddSingleton<ITokenValidationParametersProvider, TokenValidationParametersProvider>();
+
             var cosmosDbConfig = new CosmosDbConfiguration();
             configuration.GetSection("CosmosDb").Bind(cosmosDbConfig);
 
             services.AddDbContext<SafeExchangeCPDbContext>(
                 options => options.UseCosmos(
                     cosmosDbConfig.CosmosDbEndpoint, new DefaultAzureCredential(), cosmosDbConfig.DatabaseName));
+
+            services.AddSingleton<ITokenHelper, TokenHelper>();
 
             services.Configure<JsonSerializerOptions>(options =>
             {

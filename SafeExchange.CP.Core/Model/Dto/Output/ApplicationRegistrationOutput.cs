@@ -1,0 +1,23 @@
+﻿/// <summary>
+/// AccessRequestOutput
+/// </summary>
+
+namespace SafeExchange.CP.Core.Model.Dto.Output
+{
+    using System;
+
+    public class ApplicationRegistrationOutput
+    {
+        public string DisplayName { get; set; }
+
+        public string AadTenantId { get; set; }
+
+        public string AadClientId { get; set; }
+
+        public string ContactEmail { get; set; }
+
+        public bool Enabled { get; set; }
+
+        public bool ExternalNotificationsReader { get; set; }
+    }
+}

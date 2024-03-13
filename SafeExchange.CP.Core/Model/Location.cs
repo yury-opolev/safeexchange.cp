@@ -9,6 +9,8 @@
     {
         public string Id { get; set; }
 
+        public string PartitionKey { get; set; }
+
         public string DisplayName { get; set; }
 
         public string RegionalDisplayName { get; set; }

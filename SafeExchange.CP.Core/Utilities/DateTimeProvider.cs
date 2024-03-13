@@ -1,4 +1,4 @@
-﻿namespace SafeExchange.CP.Core.Utilities
+﻿namespace SafeExchange.CP.Core
 {
     public static class DateTimeProvider
     {

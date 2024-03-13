@@ -1,7 +1,6 @@
 ﻿namespace SafeExchange.CP.Core.Model
 {
     using Microsoft.EntityFrameworkCore;
-    using SafeExchange.CP.Core.Utilities;
     using System.ComponentModel.DataAnnotations;
 
     [PrimaryKey(nameof(Id))]
@@ -24,6 +23,8 @@
         }
 
         public string Id { get; set; }
+
+        public string PartitionKey { get; set; }
 
         public Location Location { get; set; }
 

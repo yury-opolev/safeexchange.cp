@@ -79,6 +79,12 @@ namespace SafeExchange.CP.Core.Model
             Enabled = this.Enabled,
             ExternalNotificationsReader = this.ExternalNotificationsReader
         };
+
+        internal ApplicationRegistrationOverviewOutput ToOverviewDto() => new()
+        {
+            DisplayName = this.DisplayName,
+            Enabled = this.Enabled
+        };
     }
 }
 

@@ -1,5 +1,5 @@
 ﻿
-namespace SafeExchange.CP.Core.Functions
+namespace SafeExchange.CP.Core.Functions.Admin
 {
     using Microsoft.Azure.Functions.Worker.Http;
     using Microsoft.EntityFrameworkCore;
@@ -12,7 +12,7 @@ namespace SafeExchange.CP.Core.Functions
     using System.Net;
     using System.Security.Claims;
 
-    public class SafeExchangeApplicationsList
+    public class SafeExchangeCPApplicationsList
     {
         private readonly SafeExchangeCPDbContext dbContext;
 
@@ -20,7 +20,7 @@ namespace SafeExchange.CP.Core.Functions
 
         private readonly GlobalFilters globalFilters;
 
-        public SafeExchangeApplicationsList(SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters)
+        public SafeExchangeCPApplicationsList(SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters)
         {
             this.globalFilters = globalFilters ?? throw new ArgumentNullException(nameof(globalFilters));
             this.tokenHelper = tokenHelper ?? throw new ArgumentNullException(nameof(tokenHelper));
@@ -37,14 +37,14 @@ namespace SafeExchange.CP.Core.Functions
             }
 
             (SubjectType subjectType, string subjectId) = await SubjectHelper.GetSubjectInfoAsync(this.tokenHelper, principal, this.dbContext);
-            if (SubjectType.Application.Equals(subjectType) && string.IsNullOrEmpty(subjectId))
+            if (SubjectType.Application.Equals(subjectType))
             {
                 await ActionResults.CreateResponseAsync(
                     request, HttpStatusCode.Forbidden,
-                    new BaseResponseObject<object> { Status = "forbidden", Error = "Application is not registered or disabled." });
+                    new BaseResponseObject<object> { Status = "forbidden", Error = "Applications cannot use this API." });
             }
 
-            log.LogInformation($"{nameof(SafeExchangeApplicationsList)} triggered by {subjectType} {subjectId}, [{request.Method}].");
+            log.LogInformation($"{nameof(SafeExchangeCPApplicationsList)} triggered by {subjectType} {subjectId}, [{request.Method}].");
 
             switch (request.Method.ToLower())
             {

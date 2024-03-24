@@ -3,6 +3,13 @@
     using Microsoft.EntityFrameworkCore;
     using System.ComponentModel.DataAnnotations;
 
+    /// <summary>
+    /// EntityRecord is a registry item that, for a given secret name, points to a safeexchange
+    /// backend geo-specific instance.
+    /// All secrets that exist in safeexchange, have a globally-unique name, therefore
+    /// a secret name should always be present in the registry, associated with a geo-specific
+    /// backend instance.
+    /// </summary>
     [PrimaryKey(nameof(EntityType), nameof(EntityName))]
     public class EntityRecord
     {

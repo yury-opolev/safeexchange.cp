@@ -48,7 +48,7 @@ namespace SafeExchange.CP.Core.DatabaseContext
                         gi => gi.Location,
                         gib =>
                         {
-                            gib.Property(l => l.Id).IsRequired();
+                            gib.Property(l => l.Name).IsRequired();
                             gib.Property(l => l.DisplayName).IsRequired();
                             gib.Property(l => l.RegionalDisplayName).IsRequired();
                         });
@@ -59,7 +59,7 @@ namespace SafeExchange.CP.Core.DatabaseContext
             modelBuilder.Entity<Location>()
                 .ToContainer("Locations")
                 .HasNoDiscriminator()
-                .HasPartitionKey(ar => ar.PartitionKey);
+                .HasPartitionKey(l => l.PartitionKey);
         }
     }
 }

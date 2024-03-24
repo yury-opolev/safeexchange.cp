@@ -1,29 +1,39 @@
 ﻿namespace SafeExchange.CP.Core.Model
 {
     using Microsoft.EntityFrameworkCore;
+    using SafeExchange.CP.Core.Model.Dto.Output;
 
-    [PrimaryKey(nameof(Id))]
+    [PrimaryKey(nameof(Name))]
     [Index(nameof(DisplayName), IsUnique = true)]
     [Index(nameof(RegionalDisplayName), IsUnique = true)]
     public class Location
     {
         public const string DefaultPartitionKey = "LOCATION";
 
-        public Location(string displayName, string regionalDisplayName, bool isDefault)
+        public Location() { }
+
+        public Location(string name, string displayName, string regionalDisplayName)
         {
-            this.Id = Guid.NewGuid().ToString();
+            this.Name = name;
             this.PartitionKey = DefaultPartitionKey;
 
             this.DisplayName = displayName;
             this.RegionalDisplayName = regionalDisplayName;
         }
 
-        public string Id { get; set; }
+        public string Name { get; set; }
 
         public string PartitionKey { get; set; }
 
         public string DisplayName { get; set; }
 
         public string RegionalDisplayName { get; set; }
+
+        internal LocationOutput ToDto() => new()
+        {
+            Name = this.Name,
+            DisplayName = this.DisplayName,
+            RegionalDisplayName = this.RegionalDisplayName,
+        };
     }
 }

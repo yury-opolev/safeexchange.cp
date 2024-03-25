@@ -66,6 +66,12 @@
                 "description": "Log analytics workspace name."
             }
         },
+        "settings-authentication-entra-tenantId": {
+            "type": "string",
+            "metadata": {
+                "description": "Microsoft Entra Tenant Id, used for authentication."
+            }
+        },
         "settings-authentication-validAudiences": {
             "type": "string"
         },
@@ -91,8 +97,7 @@
         "documentDb_role_accountContributor": "5bd9cd88-fe45-4216-938b-f97437e15450",
         "safeexchange_kv_deployment_name": "safeexch-cp-storage-connstr-kv-ref",
         "appinsights_workspace_retention_days": 30,
-        "appinsights_workspace_resource_permissions": true,
-        "appinsights_workspace_heartbeat_retention_days": 30
+        "appinsights_workspace_resource_permissions": true
     },
     "resources": [
         {
@@ -111,17 +116,6 @@
             }
         },
         {
-            "type": "Microsoft.OperationalInsights/workspaces/tables",
-            "apiVersion": "2021-12-01-preview",
-            "name": "[format('{0}/{1}', parameters('appinsights_cp_workspace_name'), 'Heartbeat')]",
-            "properties": {
-                "retentionInDays": "[variables('appinsights_workspace_heartbeat_retention_days')]"
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('appinsights_cp_workspace_name'))]"
-            ]
-        },
-        {
             "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
             "name": "[variables('safeexchange_userassigned_mi_name')]",
             "apiVersion": "2018-11-30",
@@ -130,7 +124,7 @@
         {
             "type": "Microsoft.DocumentDB/databaseAccounts",
             "apiVersion": "2023-09-15",
-            "name": "[parameters('safeexchange_dbaccount_name')]",
+            "name": "[parameters('safeexchange_cp_dbaccount_name')]",
             "location": "[parameters('default_location')]",
             "tags": {
                 "defaultExperience": "Core (SQL)",
@@ -311,9 +305,9 @@
             "type": "Microsoft.Authorization/roleAssignments",
             "apiVersion": "2022-04-01",
             "name": "[guid(resourceGroup().name, parameters('safeexchange_cp_service_name'), 'documentdb-account-contributor', 'systemassigned-mi')]",
-            "scope": "[concat('Microsoft.DocumentDB/databaseAccounts/', parameters('safeexchange_dbaccount_name'))]",
+            "scope": "[concat('Microsoft.DocumentDB/databaseAccounts/', parameters('safeexchange_cp_dbaccount_name'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_dbaccount_name'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]",
                 "[resourceId('Microsoft.Web/sites', parameters('safeexchange_cp_service_name'))]"
             ],
             "properties": {
@@ -359,17 +353,17 @@
         },
         {
             "type": "Microsoft.Web/serverfarms",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-01-01",
             "name": "[parameters('safeexchange_cp_serverfarm_name')]",
             "location": "[parameters('default_location')]",
             "sku": {
-                "name": "Y1",
-                "tier": "Dynamic",
-                "size": "Y1",
-                "family": "Y",
-                "capacity": 0
+                "name": "EP1",
+                "tier": "ElasticPremium",
+                "size": "EP1",
+                "family": "EP",
+                "capacity": 1
             },
-            "kind": "functionapp",
+            "kind": "elastic",
             "properties": {
                 "perSiteScaling": false,
                 "elasticScaleEnabled": false,
@@ -386,9 +380,9 @@
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
             "apiVersion": "2023-09-15",
-            "name": "[concat(parameters('safeexchange_dbaccount_name'), '/', parameters('safeexchange_cp_cosmosdb_database_name'))]",
+            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), '/', parameters('safeexchange_cp_cosmosdb_database_name'))]",
             "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_dbaccount_name'))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
             ],
             "properties": {
                 "resource": {
@@ -399,15 +393,15 @@
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
             "apiVersion": "2023-09-15",
-            "name": "[concat(parameters('safeexchange_dbaccount_name'), '/00000000-0000-0000-0000-000000000001')]",
+            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), '/00000000-0000-0000-0000-000000000001')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_dbaccount_name'))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
             ],
             "properties": {
                 "roleName": "Cosmos DB Built-in Data Reader",
                 "type": "BuiltInRole",
                 "assignableScopes": [
-                    "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_dbaccount_name'))]"
+                    "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
                 ],
                 "permissions": [
                     {
@@ -425,15 +419,15 @@
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions",
             "apiVersion": "2023-09-15",
-            "name": "[concat(parameters('safeexchange_dbaccount_name'), '/00000000-0000-0000-0000-000000000002')]",
+            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), '/00000000-0000-0000-0000-000000000002')]",
             "dependsOn": [
-                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_dbaccount_name'))]"
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
             ],
             "properties": {
                 "roleName": "Cosmos DB Built-in Data Contributor",
                 "type": "BuiltInRole",
                 "assignableScopes": [
-                    "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_dbaccount_name'))]"
+                    "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
                 ],
                 "permissions": [
                     {
@@ -476,7 +470,7 @@
                     "enabled": true
                 },
                 "contentType": "text/plain",
-                "value": "[concat('https://login.microsoftonline.com/', parameters('settings-aadClient-tenantId'), '/v2.0/.well-known/openid-configuration')]"
+                "value": "[concat('https://login.microsoftonline.com/', parameters('settings-authentication-entra-tenantId'), '/v2.0/.well-known/openid-configuration')]"
             }
         },
         {
@@ -556,7 +550,7 @@
                     "enabled": true
                 },
                 "contentType": "text/plain",
-                "value": "[concat('https://', parameters('safeexchange_dbaccount_name'), '.documents.azure.com:443/')]"
+                "value": "[concat('https://', parameters('safeexchange_cp_dbaccount_name'), '.documents.azure.com:443/')]"
             }
         },
         {
@@ -756,6 +750,59 @@
             "properties": {
                 "siteName": "[parameters('safeexchange_cp_service_name')]",
                 "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+            "apiVersion": "2023-09-15",
+            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), '/', parameters('safeexchange_cp_cosmosdb_database_name'), '/Users')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('safeexchange_cp_dbaccount_name'), parameters('safeexchange_cp_cosmosdb_database_name'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
+            ],
+            "properties": {
+                "resource": {
+                    "id": "Users",
+                    "indexingPolicy": {
+                        "indexingMode": "consistent",
+                        "automatic": true,
+                        "includedPaths": [
+                            {
+                                "path": "/*"
+                            }
+                        ],
+                        "excludedPaths": [
+                            {
+                                "path": "/\"_etag\"/?"
+                            }
+                        ]
+                    },
+                    "partitionKey": {
+                        "paths": [
+                            "/PartitionKey"
+                        ],
+                        "kind": "Hash"
+                    },
+                    "uniqueKeyPolicy": {
+                        "uniqueKeys": [
+                            {
+                                "paths": [
+                                    "/AadTenantId",
+                                    "/AadObjectId"
+                                ]
+                            },
+                            {
+                                "paths": [
+                                    "/AadUpn"
+                                ]
+                            }
+                        ]
+                    },
+                    "conflictResolutionPolicy": {
+                        "mode": "LastWriterWins",
+                        "conflictResolutionPath": "/_ts"
+                    }
+                }
             }
         }
     ]

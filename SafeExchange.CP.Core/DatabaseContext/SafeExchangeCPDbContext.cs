@@ -19,6 +19,10 @@ namespace SafeExchange.CP.Core.DatabaseContext
 
         public DbSet<Location> Locations { get; set; }
 
+        public SafeExchangeCPDbContext(DbContextOptions<SafeExchangeCPDbContext> options)
+            : base(options)
+        { }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()

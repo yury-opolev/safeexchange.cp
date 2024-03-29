@@ -450,7 +450,7 @@
         {
             "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
             "apiVersion": "2023-11-15",
-            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), 'cosmosdb-builtin-datacontributor-systemassigned-mi')]",
+            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), '/', guid('cosmosdb-builtin-datacontributor', 'systemassigned-mi'))]",
             "dependsOn": [
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]",
                 "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('safeexchange_cp_dbaccount_name'), '00000000-0000-0000-0000-000000000002')]",

@@ -73,10 +73,16 @@
             }
         },
         "settings-authentication-validAudiences": {
-            "type": "string"
+            "type": "string",
+            "metadata": {
+                "description": "List of allow-listed audience used for authentication, as a comma-separated list."
+            }
         },
         "settings-authentication-validIssuers": {
-            "type": "string"
+            "type": "string",
+            "metadata": {
+                "description": "List of allow-listed audience used for authentication, as a comma-separated list."
+            }
         },
         "settings-adminConfiguration-adminUsers": {
             "defaultValue": "00000000-0000-0000-0000-000000000000",

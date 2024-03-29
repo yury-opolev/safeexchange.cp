@@ -3,13 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "safeexchange_cp_service_name": {
-            "value": null
+            "value": "safeexchange-stg-cp"
+        },
+        "settings-authentication-entra-tenantId": {
+            "value": "1472703e-99d8-45ee-aeac-7ec3ae9ab104"
         },
         "settings-authentication-validAudiences": {
-            "value": null
+            "value": "fdfa17b0-db9b-4927-8b83-07055ae70c39,api://safeexchange-staging.onmicrosoft.com"
         },
         "settings-authentication-validIssuers": {
-            "value": null
+            "value": "https://sts.windows.net/1472703e-99d8-45ee-aeac-7ec3ae9ab104/"
         }
     }
 }

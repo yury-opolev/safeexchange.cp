@@ -13,6 +13,9 @@
         },
         "settings-authentication-validIssuers": {
             "value": "https://sts.windows.net/1472703e-99d8-45ee-aeac-7ec3ae9ab104/"
+        },
+        "settings-adminConfiguration-adminUsers": {
+            "value": "06c82aa4-d269-41d2-9d41-e8dbe5c87765"
         }
     }
 }

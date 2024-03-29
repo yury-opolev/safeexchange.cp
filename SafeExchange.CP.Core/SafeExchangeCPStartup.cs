@@ -14,6 +14,7 @@ namespace SafeExchange.CP.Core
     using SafeExchange.CP.Core.AzureAd;
     using SafeExchange.CP.Core.Configuration;
     using SafeExchange.CP.Core.DatabaseContext;
+    using SafeExchange.CP.Core.Filters;
     using SafeExchange.CP.Core.Graph;
     using SafeExchange.CP.Core.Middleware;
     using System.Text.Json;
@@ -61,6 +62,7 @@ namespace SafeExchange.CP.Core
             services.AddSingleton<ITokenHelper, TokenHelper>();
             services.AddSingleton<IConfidentialClientProvider, ConfidentialClientProvider>();
             services.AddSingleton<IGraphDataProvider, GraphDataProvider>();
+            services.AddSingleton<GlobalFilters>();
 
             services.Configure<JsonSerializerOptions>(options =>
             {

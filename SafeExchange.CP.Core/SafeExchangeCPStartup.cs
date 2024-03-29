@@ -43,6 +43,8 @@ namespace SafeExchange.CP.Core
                     Manager = new KeyVaultSecretManager(),
                     ReloadInterval = TimeSpan.FromMinutes(5)
                 });
+
+            configurationBuilder.AddCosmosDbKeysConfiguration();
         }
 
         public static void ConfigureServices(IConfiguration configuration, IServiceCollection services)
@@ -55,9 +57,14 @@ namespace SafeExchange.CP.Core
             var cosmosDbConfig = new CosmosDbConfiguration();
             configuration.GetSection("CosmosDb").Bind(cosmosDbConfig);
 
+            var cosmosDbKeys = new CosmosDbKeys();
+            configuration.GetSection(CosmosDbKeysProvider.CosmosDbKeysSectionName).Bind(cosmosDbKeys);
+
             services.AddDbContext<SafeExchangeCPDbContext>(
                 options => options.UseCosmos(
-                    cosmosDbConfig.CosmosDbEndpoint, new DefaultAzureCredential(), cosmosDbConfig.DatabaseName));
+                    cosmosDbConfig.CosmosDbEndpoint,
+                    cosmosDbKeys.PrimaryKey,
+                    cosmosDbConfig.DatabaseName));
 
             services.AddSingleton<ITokenHelper, TokenHelper>();
             services.AddSingleton<IConfidentialClientProvider, ConfidentialClientProvider>();

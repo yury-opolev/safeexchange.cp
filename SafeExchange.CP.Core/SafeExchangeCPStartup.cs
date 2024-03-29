@@ -69,6 +69,8 @@ namespace SafeExchange.CP.Core
                 options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
                 options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
+
+            services.Configure<AdminConfiguration>(configuration.GetSection("AdminConfiguration"));
         }
     }
 }

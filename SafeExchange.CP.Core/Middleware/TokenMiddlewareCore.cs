@@ -13,10 +13,10 @@ namespace SafeExchange.CP.Core.Middleware
     using System.Net;
     using System.Security.Claims;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Configuration;
     using SafeExchange.CP.Core.Configuration;
     using SafeExchange.CP.Core.Model;
     using SafeExchange.CP.Core.Graph;
+    using Microsoft.Extensions.Options;
 
     public class TokenMiddlewareCore : ITokenMiddlewareCore
     {
@@ -32,11 +32,9 @@ namespace SafeExchange.CP.Core.Middleware
 
         private readonly ILogger log;
 
-        public TokenMiddlewareCore(IConfiguration configuration, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, IGraphDataProvider graphDataProvider, ILogger<TokenMiddlewareCore> log)
+        public TokenMiddlewareCore(IOptionsSnapshot<AdminConfiguration> adminConfiguration, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, IGraphDataProvider graphDataProvider, ILogger<TokenMiddlewareCore> log)
         {
-            var adminConfiguration = new AdminConfiguration();
-            configuration.GetSection("AdminConfiguration").Bind(adminConfiguration);
-            this.useGroups = !string.IsNullOrWhiteSpace(adminConfiguration.AdminGroups);
+            this.useGroups = !string.IsNullOrWhiteSpace(adminConfiguration.Value.AdminGroups);
 
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             this.tokenHelper = tokenHelper ?? throw new ArgumentNullException(nameof(tokenHelper));

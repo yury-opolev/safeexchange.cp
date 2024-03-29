@@ -45,20 +45,12 @@ namespace SafeExchange.CP.Core.DatabaseContext
                 .HasNoDiscriminator()
                 .HasPartitionKey(gi => gi.PartitionKey);
 
-            modelBuilder.Entity<GeoInstance>(
-                gie =>
-                {
-                    gie.OwnsOne(
-                        gi => gi.Location,
-                        gib =>
-                        {
-                            gib.Property(l => l.Name).IsRequired();
-                            gib.Property(l => l.DisplayName).IsRequired();
-                            gib.Property(l => l.RegionalDisplayName).IsRequired();
-                        });
-
-                    gie.Navigation(gi => gi.Location).IsRequired();
-                });
+            modelBuilder.Entity<GeoInstance>()
+                .HasOne(gi => gi.Location)
+                .WithMany(l => l.GeoInstances)
+                .HasForeignKey(gi => gi.LocationName)
+                .HasPrincipalKey(l => l.Name)
+                .IsRequired();
 
             modelBuilder.Entity<Location>()
                 .ToContainer("Locations")

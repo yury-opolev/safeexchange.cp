@@ -32,6 +32,8 @@
 
         public string PartitionKey { get; set; }
 
+        public string LocationName { get; set; }
+
         public Location Location { get; set; }
 
         public bool IsDefault { get; set; }

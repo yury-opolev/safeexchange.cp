@@ -448,6 +448,21 @@
             }
         },
         {
+            "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+            "apiVersion": "2023-11-15",
+            "name": "[concat(parameters('safeexchange_cp_dbaccount_name'), 'cosmosdb-builtin-datacontributor-systemassigned-mi')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]",
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('safeexchange_cp_dbaccount_name'), '00000000-0000-0000-0000-000000000002')]",
+                "[resourceId('Microsoft.Web/sites', parameters('safeexchange_cp_service_name'))]"
+            ],
+            "properties": {
+                "roleDefinitionId": "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlRoleDefinitions', parameters('safeexchange_cp_dbaccount_name'), '00000000-0000-0000-0000-000000000002')]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites', parameters('safeexchange_cp_service_name')), '2022-09-01', 'Full').identity.principalId]",
+                "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('safeexchange_cp_dbaccount_name'))]"
+            }
+        },
+        {
             "type": "Microsoft.KeyVault/vaults/secrets",
             "apiVersion": "2023-02-01",
             "name": "[concat(parameters('safeexchange_cp_kv_name'), '/AdminConfiguration--AdminUsers')]",

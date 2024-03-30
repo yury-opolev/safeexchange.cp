@@ -7,7 +7,9 @@ namespace SafeExchange.ControlPlane
     using Microsoft.Azure.Functions.Worker;
     using Microsoft.Azure.Functions.Worker.Http;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using SafeExchange.CP.Core;
+    using SafeExchange.CP.Core.Configuration;
     using SafeExchange.CP.Core.DatabaseContext;
     using SafeExchange.CP.Core.Filters;
     using SafeExchange.CP.Core.Functions.Admin;
@@ -22,9 +24,9 @@ namespace SafeExchange.ControlPlane
 
         private readonly ILogger log;
 
-        public SafeAdminOperations(SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters, ILogger<SafeAdminOperations> log)
+        public SafeAdminOperations(IOptions<CosmosDbConfiguration> cosmosDbConfiguration, IOptions<CosmosDbKeys> cosmosDbKeys, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters, ILogger<SafeAdminOperations> log)
         {
-            this.adminOperationsHandler = new SafeExchangeCPAdminOperations(dbContext, tokenHelper, globalFilters);
+            this.adminOperationsHandler = new SafeExchangeCPAdminOperations(cosmosDbConfiguration, cosmosDbKeys, dbContext, tokenHelper, globalFilters);
             this.log = log ?? throw new ArgumentNullException(nameof(log));
         }
 

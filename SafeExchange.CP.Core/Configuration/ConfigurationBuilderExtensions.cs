@@ -4,14 +4,14 @@
 
 namespace SafeExchange.CP.Core.Configuration
 {
+    using Azure.Core;
     using Microsoft.Extensions.Configuration;
 
     public static class ConfigurationBuilderExtensions
     {
-        public static IConfigurationBuilder AddCosmosDbKeysConfiguration(this IConfigurationBuilder builder)
+        public static IConfigurationBuilder AddCosmosDbKeysConfiguration(this IConfigurationBuilder builder, TokenCredential tokenCredential, CosmosDbConfiguration cosmosDbConfiguration)
         {
-            var interimConfig = builder.Build();
-            return builder.Add(new CosmosDbKeysSource(interimConfig));
+            return builder.Add(new CosmosDbKeysSource(cosmosDbConfiguration, tokenCredential));
         }
     }
 }

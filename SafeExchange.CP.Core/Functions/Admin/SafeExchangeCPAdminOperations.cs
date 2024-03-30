@@ -5,8 +5,11 @@
 namespace SafeExchange.CP.Core.Functions.Admin
 {
     using Microsoft.Azure.Functions.Worker.Http;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using SafeExchange.CP.Core;
+    using SafeExchange.CP.Core.Configuration;
     using SafeExchange.CP.Core.DatabaseContext;
     using SafeExchange.CP.Core.Filters;
     using SafeExchange.CP.Core.Model;
@@ -16,16 +19,22 @@ namespace SafeExchange.CP.Core.Functions.Admin
 
     public class SafeExchangeCPAdminOperations
     {
-        private readonly SafeExchangeCPDbContext dbContext;
-
         private readonly ITokenHelper tokenHelper;
 
         private readonly GlobalFilters globalFilters;
 
-        public SafeExchangeCPAdminOperations(SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters)
+        private readonly CosmosDbConfiguration cosmosDbConfiguration;
+
+        private readonly CosmosDbKeys cosmosDbKeys;
+
+        private readonly SafeExchangeCPDbContext dbContext;
+
+        public SafeExchangeCPAdminOperations(IOptions<CosmosDbConfiguration> cosmosDbConfiguration, IOptions<CosmosDbKeys> cosmosDbKeys, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters)
         {
             this.globalFilters = globalFilters ?? throw new ArgumentNullException(nameof(globalFilters));
             this.tokenHelper = tokenHelper ?? throw new ArgumentNullException(nameof(tokenHelper));
+            this.cosmosDbConfiguration = cosmosDbConfiguration.Value ?? throw new ArgumentNullException(nameof(cosmosDbConfiguration));
+            this.cosmosDbKeys = cosmosDbKeys.Value ?? throw new ArgumentNullException(nameof(cosmosDbKeys));
             this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
         }
 
@@ -68,7 +77,7 @@ namespace SafeExchange.CP.Core.Functions.Admin
             switch (operationName)
             {
                 case "ensure_dbcreated":
-                    await this.dbContext.Database.EnsureCreatedAsync();
+                    await EnsureDbCreatedAsync();
                     break;
 
                 default:
@@ -80,6 +89,18 @@ namespace SafeExchange.CP.Core.Functions.Admin
                 request, HttpStatusCode.OK,
                 new BaseResponseObject<object> { Status = "ok", Result = "ok" });
         }, nameof(PerformOperationAsync), log);
+
+        private async Task EnsureDbCreatedAsync()
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<SafeExchangeCPDbContext>();
+            optionsBuilder.UseCosmos(
+                cosmosDbConfiguration.CosmosDbEndpoint,
+                cosmosDbKeys.PrimaryKey,
+                cosmosDbConfiguration.DatabaseName);
+
+            using SafeExchangeCPDbContext adminDbContext = new SafeExchangeCPDbContext(optionsBuilder.Options);
+            await adminDbContext.Database.EnsureCreatedAsync();
+        }
 
         private static async Task<HttpResponseData> TryCatch(HttpRequestData request, Func<Task<HttpResponseData>> action, string actionName, ILogger log)
         {

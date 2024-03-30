@@ -18,6 +18,7 @@ namespace SafeExchange.CP.Core
     using SafeExchange.CP.Core.Filters;
     using SafeExchange.CP.Core.Graph;
     using SafeExchange.CP.Core.Middleware;
+    using System.Configuration;
     using System.Text.Json;
     using System.Text.Json.Serialization;
 
@@ -57,14 +58,15 @@ namespace SafeExchange.CP.Core
             services.AddScoped<ITokenMiddlewareCore, TokenMiddlewareCore>();
             services.AddSingleton<ITokenValidationParametersProvider, TokenValidationParametersProvider>();
 
+            var defaultAzureCredential = new DefaultAzureCredential();
+            var cosmosDbConfig = configuration.GetSection("CosmosDb").Get<CosmosDbConfiguration>() ?? throw new ConfigurationErrorsException("Cannot get CosmosDb configuration.");
             services.AddDbContext<SafeExchangeCPDbContext>(
-                (serviceProvider, options) =>
+                (options) =>
                 {
-                    var cosmosDbConfig = serviceProvider.GetRequiredService<IOptions<CosmosDbConfiguration>>();
                     options.UseCosmos(
-                        cosmosDbConfig.Value.CosmosDbEndpoint,
-                        new DefaultAzureCredential(),
-                        cosmosDbConfig.Value.DatabaseName);
+                        cosmosDbConfig.CosmosDbEndpoint,
+                        defaultAzureCredential,
+                        cosmosDbConfig.DatabaseName);
                 });
 
             services.AddSingleton<ITokenHelper, TokenHelper>();

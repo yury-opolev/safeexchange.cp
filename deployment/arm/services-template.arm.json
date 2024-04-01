@@ -970,6 +970,20 @@
                         "kind": "Hash",
                         "version": 2
                     },
+                    "uniqueKeyPolicy": {
+                        "uniqueKeys": [
+                            {
+                                "paths": [
+                                    "/DisplayName"
+                                ]
+                            },
+                            {
+                                "paths": [
+                                    "/RegionalDisplayName"
+                                ]
+                            }
+                        ]
+                    },
                     "conflictResolutionPolicy": {
                         "mode": "LastWriterWins",
                         "conflictResolutionPath": "/_ts"

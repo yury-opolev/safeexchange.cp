@@ -10,8 +10,6 @@ namespace SafeExchange.CP.Core.Model.Dto.Input
     {
         public bool? Enabled { get; set; }
 
-        public bool? ExternalNotificationsReader { get; set; }
-
         public string ContactEmail { get; set; }
     }
 }

@@ -17,7 +17,5 @@ namespace SafeExchange.CP.Core.Model.Dto.Output
         public string ContactEmail { get; set; }
 
         public bool Enabled { get; set; }
-
-        public bool ExternalNotificationsReader { get; set; }
     }
 }

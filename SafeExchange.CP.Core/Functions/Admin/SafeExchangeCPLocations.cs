@@ -209,6 +209,32 @@ namespace SafeExchange.CP.Core.Functions.Admin
                     new BaseResponseObject<object> { Status = "error", Error = "Update data is not provided." });
             }
 
+            if (!string.IsNullOrEmpty(updateInput.DisplayName) && !updateInput.DisplayName.Equals(existingRegistration.DisplayName))
+            {
+                var otherExistingRegistration = await this.dbContext.Locations
+                    .FirstOrDefaultAsync(r => r.DisplayName.Equals(updateInput.DisplayName));
+                if (otherExistingRegistration != null)
+                {
+                    log.LogInformation($"Cannot register location with display name '{updateInput.DisplayName}', as it already exists.");
+                    return await ActionResults.CreateResponseAsync(
+                        request, HttpStatusCode.Conflict,
+                        new BaseResponseObject<object> { Status = "conflict", Error = $"Location with display name '{updateInput.DisplayName}' already exists." });
+                }
+            }
+
+            if (!string.IsNullOrEmpty(updateInput.RegionalDisplayName) && !updateInput.RegionalDisplayName.Equals(existingRegistration.RegionalDisplayName))
+            {
+                var otherExistingRegistration = await this.dbContext.Locations
+                    .FirstOrDefaultAsync(r => r.RegionalDisplayName.Equals(updateInput.RegionalDisplayName));
+                if (otherExistingRegistration != null)
+                {
+                    log.LogInformation($"Cannot register location with regional display name '{updateInput.RegionalDisplayName}', as it already exists.");
+                    return await ActionResults.CreateResponseAsync(
+                        request, HttpStatusCode.Conflict,
+                        new BaseResponseObject<object> { Status = "conflict", Error = $"Location with regional display name '{updateInput.RegionalDisplayName}' already exists." });
+                }
+            }
+
             var updatedRegistration = await this.UpdateLocationRegistrationAsync(existingRegistration, updateInput, log);
             log.LogInformation($"{subjectType} '{subjectId}' updated location registration '{existingRegistration.Name}': '{updateInput.DisplayName ?? "-"}', '{updateInput.RegionalDisplayName ?? "-"}'.");
 

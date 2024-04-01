@@ -29,12 +29,12 @@ namespace SafeExchange.ControlPlane
 
         [Function("SafeExchangeCP-Location")]
         public async Task<HttpResponseData> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", "patch", "delete", Route = $"{Version}/locations/{{locationId}}")]
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", "get", "patch", "delete", Route = $"{Version}/locations/{{locationName}}")]
             HttpRequestData request,
-            string locationId)
+            string locationName)
         {
             var principal = request.FunctionContext.GetPrincipal();
-            return await this.safeExchangeCPLocationsHandler.Run(request, locationId, principal, this.log);
+            return await this.safeExchangeCPLocationsHandler.Run(request, locationName, principal, this.log);
         }
     }
 }

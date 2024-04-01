@@ -4,7 +4,6 @@ namespace SafeExchange.CP.Core.Functions.Admin
     using Microsoft.Azure.Functions.Worker.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
-    using Microsoft.IdentityModel.Tokens;
     using SafeExchange.CP.Core.DatabaseContext;
     using SafeExchange.CP.Core.Filters;
     using SafeExchange.CP.Core.Model;
@@ -13,7 +12,6 @@ namespace SafeExchange.CP.Core.Functions.Admin
     using System;
     using System.Net;
     using System.Security.Claims;
-    using System.Text.RegularExpressions;
 
     public class SafeExchangeCPLocations
     {

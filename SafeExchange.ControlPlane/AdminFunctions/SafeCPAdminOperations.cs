@@ -1,5 +1,5 @@
 ﻿/// <summary>
-/// SafeAdminOperations
+/// SafeCPAdminOperations
 /// </summary>
 
 namespace SafeExchange.ControlPlane
@@ -16,17 +16,17 @@ namespace SafeExchange.ControlPlane
     using SafeExchange.CP.Core.Middleware;
     using System.Threading.Tasks;
 
-    public class SafeAdminOperations
+    public class SafeCPAdminOperations
     {
         private const string Version = "v1";
 
-        private SafeExchangeCPAdminOperations adminOperationsHandler;
+        private SafeExchangeCPAdminOperations cpAdminOperationsHandler;
 
         private readonly ILogger log;
 
-        public SafeAdminOperations(IOptions<CosmosDbConfiguration> cosmosDbConfiguration, IOptions<CosmosDbKeys> cosmosDbKeys, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters, ILogger<SafeAdminOperations> log)
+        public SafeCPAdminOperations(IOptions<CosmosDbConfiguration> cosmosDbConfiguration, IOptions<CosmosDbKeys> cosmosDbKeys, SafeExchangeCPDbContext dbContext, ITokenHelper tokenHelper, GlobalFilters globalFilters, ILogger<SafeCPAdminOperations> log)
         {
-            this.adminOperationsHandler = new SafeExchangeCPAdminOperations(cosmosDbConfiguration, cosmosDbKeys, dbContext, tokenHelper, globalFilters);
+            this.cpAdminOperationsHandler = new SafeExchangeCPAdminOperations(cosmosDbConfiguration, cosmosDbKeys, dbContext, tokenHelper, globalFilters);
             this.log = log ?? throw new ArgumentNullException(nameof(log));
         }
 
@@ -37,7 +37,7 @@ namespace SafeExchange.ControlPlane
             string operationName)
         {
             var principal = request.FunctionContext.GetPrincipal();
-            return await this.adminOperationsHandler.Run(request, operationName, principal, this.log);
+            return await this.cpAdminOperationsHandler.Run(request, operationName, principal, this.log);
         }
     }
 }

@@ -12,7 +12,7 @@
 
         public GeoInstance() { }
 
-        public GeoInstance(string displayName, string instancePrefix, string instanceBaseUrl, Location location, bool isDefault, string createdBy)
+        public GeoInstance(string displayName, string instancePrefix, string instanceBaseUrl, Location location, string createdBy)
         {
             this.Id = Guid.NewGuid().ToString();
             this.PartitionKey = DefaultPartitionKey;
@@ -21,8 +21,13 @@
             this.InstancePrefix = instancePrefix;
             this.InstanceBaseUrl = instanceBaseUrl;
 
+            if (string.IsNullOrEmpty(location.Name))
+            {
+                throw new ArgumentException($"{nameof(location)} does not have {nameof(location.Name)} value.");
+            }
+
+            this.LocationName = location.Name;
             this.Location = location;
-            this.IsDefault = isDefault;
 
             this.CreatedAt = DateTimeProvider.UtcNow;
             this.CreatedBy = createdBy;
@@ -35,8 +40,6 @@
         public string LocationName { get; set; }
 
         public Location Location { get; set; }
-
-        public bool IsDefault { get; set; }
 
         [Required]
         [StringLength(150, ErrorMessage = "Value too long (150 character limit).")]
